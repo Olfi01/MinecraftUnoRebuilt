@@ -48,4 +48,4 @@ jobs:
           HashKnownHosts no
         EOF
     - name: Run test command
-      run: ssh mctest@flommc echo 'Hello!' > message.txt
+      run: ssh mctest@flommc "echo 'Hello!' > message.txt"
