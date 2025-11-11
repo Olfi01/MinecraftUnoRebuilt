@@ -36,16 +36,15 @@ jobs:
     - name: Set up SSH key
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_HOST_PUBLIC_KEY: ${{ secrets.SSH_HOST_PUBLIC_KEY }}
+        SSH_HOST_PUBLIC_KEY: ${{ vars.SSH_HOST_PUBLIC_KEY }}
       run: |
         mkdir -p ~/.ssh
         touch ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
         echo $SSH_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts
-        cat ~/.ssh/known_hosts
         cat << EOF >> ~/.ssh/config
-        Host *
+        Host flommc
           HashKnownHosts no
         EOF
     - name: Run test command
