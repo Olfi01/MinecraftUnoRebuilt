@@ -1,0 +1,47 @@
+name: Run plugin on test server
+
+on:
+  push:
+    branches: [ "test-gha" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # build:
+
+  #   runs-on: intranet
+  #   permissions:
+  #     contents: read
+
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - name: Set up JDK 21
+  #     uses: actions/setup-java@v4
+  #     with:
+  #       java-version: '21'
+  #       distribution: 'temurin'
+
+  #   - name: Setup Gradle
+  #     uses: gradle/actions/setup-gradle@v4.0.0
+
+  #   - name: Build with Gradle Wrapper
+  #     run: ./gradlew build
+
+  deploy:
+  
+    runs-on: intranet
+    environment: mctest
+
+    steps:
+    - name: Set up SSH key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST_PUBLIC_KEY: ${{ secrets.SSH_HOST_PUBLIC_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        touch ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+        echo $SSH_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts
+    - name: Run test command
+      run: ssh mctest@flommc echo 'Hello!' > message.txt
