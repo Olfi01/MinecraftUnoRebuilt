@@ -48,5 +48,4 @@ jobs:
           HashKnownHosts no
         EOF
     - name: Restart server
-      run: |
-        ssh mctest@flommc 'echo $(paper-1.21.10/stop.sh) > log.txt'
+      run: ssh mctest@flommc '~/paper-1.21.10/stop.sh'
