@@ -5,12 +5,14 @@ import de.crazypokemondev.minecraftUnoRebuilt.helpers.ItemHelper;
 import de.crazypokemondev.minecraftUnoRebuilt.helpers.Updatable;
 import de.crazypokemondev.uniGUI.api.Gui;
 import de.crazypokemondev.uniGUI.api.GuiState;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.eu.zajc.juno.cards.UnoCard;
+import org.eu.zajc.juno.players.UnoPlayer;
 import org.jetbrains.annotations.Nullable;
 import xyz.janboerman.guilib.api.ItemBuilder;
 import xyz.janboerman.guilib.api.menu.ItemButton;
@@ -160,7 +162,12 @@ public class VanillaUnoGui extends VanillaUnoCardsScreen implements Gui {
 
         @Override
         public void update() {
-            setIcon(state.isFinished() ? finishedIcon : (player != null && player == state.getNextPlayer() ? waitingIcon : notWaitingIcon));
+            UnoPlayer nextPlayer = state.getNextPlayer();
+            ItemStack icon = state.isFinished() ? finishedIcon : (player != null && player == nextPlayer ? waitingIcon : notWaitingIcon);
+            if (icon == waitingIcon && nextPlayer != null) {
+                icon.editMeta(meta -> meta.displayName(Component.text(nextPlayer.getName() + "'s turn")));
+            }
+            setIcon(icon);
         }
     }
 }
