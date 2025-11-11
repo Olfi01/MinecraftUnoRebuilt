@@ -31,13 +31,13 @@ jobs:
       - name: Upload Plugin
         uses: actions/upload-artifact@v4
         with:
-          name: UnoRebuilt.jar
+          name: UnoRebuilt Plugin
           path: build/libs/*-all.jar
           if-no-files-found: error
       - name: Upload Resource Pack
         uses: actions/upload-artifact@v4
         with:
-          name: UnoRebuilt.zip
+          name: UnoRebuilt Resource Pack
           path: resource_pack/**
 
   deploy:
@@ -53,7 +53,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v5
         with:
-          name: UnoRebuilt.jar
+          name: UnoRebuilt Plugin
           path: artifact
 
       - name: Set up SSH key
