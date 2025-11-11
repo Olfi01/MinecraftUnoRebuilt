@@ -48,4 +48,4 @@ jobs:
           HashKnownHosts no
         EOF
     - name: Restart server
-      run: ssh mctest@flommc 'screen ~/paper-1.21.10/stop.sh'
+      run: ssh mctest@flommc 'screen -dmS "STOP" ~/paper-1.21.10/stop.sh'
