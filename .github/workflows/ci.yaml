@@ -49,4 +49,4 @@ jobs:
         EOF
     - name: Restart server
       run: |
-        ssh mctest@flommc 'paper-1.21.10/stop.sh'
+        ssh mctest@flommc 'paper-1.21.10/stop.sh' || true
