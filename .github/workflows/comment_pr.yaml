@@ -8,7 +8,7 @@ jobs:
   comment:
     runs-on: crazypokemondev-runner
     permissions:
-      issues: write
+      pull-requests: write
 
     steps:
       - name: Create deployment comment
