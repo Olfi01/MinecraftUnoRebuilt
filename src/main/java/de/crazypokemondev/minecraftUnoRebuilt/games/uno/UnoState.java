@@ -101,7 +101,7 @@ public class UnoState implements GameState {
             colorCallback.set(color);
         }
 
-        public void sendBooleanCallback(boolean bool) {
+        public void sendBooleanCallback(Boolean bool) {
             booleanCallback.set(bool);
         }
 
@@ -132,6 +132,11 @@ public class UnoState implements GameState {
             });
             try {
                 UnoCardColor color = colorCallback.get();
+                if (color == null) {
+                    unoGame.onEvent("A player left unexpectedly!");
+                    unoGame.endGame();
+                    return UnoCardColor.RED;
+                }
                 scheduler.runTask(MinecraftUnoRebuilt.INSTANCE, () -> {
                     if (popup != null) popup.close(player);
                     gui.open(player);
@@ -154,7 +159,12 @@ public class UnoState implements GameState {
                 popup = MinecraftUnoRebuilt.GUI_HANDLER.openGui(player, MinecraftUnoRebuilt.GuiIds.UNO_PLAY_YES_NO, new YesNoState(UnoPlayer.this, unoCard));
             });
             try {
-                boolean bool = booleanCallback.get();
+                Boolean bool = booleanCallback.get();
+                if (bool == null) {
+                    unoGame.onEvent("A player left unexpectedly!");
+                    unoGame.endGame();
+                    return false;
+                }
                 scheduler.runTask(MinecraftUnoRebuilt.INSTANCE, () -> {
                     if (popup != null) popup.close(player);
                     gui.open(player);

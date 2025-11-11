@@ -34,7 +34,14 @@ public class VanillaUnoYesNo extends VanillaUnoCardsScreen {
 
     @Override
     public void onClose(InventoryCloseEvent event) {
-        if (event.getReason().equals(InventoryCloseEvent.Reason.PLUGIN)) return;
+        switch (event.getReason()) {
+            case PLUGIN:
+                return;
+            case DEATH:
+            case DISCONNECT:
+                state.player().sendBooleanCallback(null);
+                return;
+        }
         Scheduler scheduler = Scheduler.get();
         scheduler.runTaskLater(MinecraftUnoRebuilt.INSTANCE, event.getPlayer(),
                 () -> MinecraftUnoRebuilt.GUI_HANDLER.openGui(player, MinecraftUnoRebuilt.GuiIds.UNO_PLAY_YES_NO, state));

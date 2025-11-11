@@ -35,7 +35,14 @@ public class VanillaChooseColorGui extends VanillaUnoCardsScreen implements Gui 
 
     @Override
     public void onClose(InventoryCloseEvent event) {
-        if (event.getReason().equals(InventoryCloseEvent.Reason.PLUGIN)) return;
+        switch (event.getReason()) {
+            case PLUGIN:
+                return;
+            case DEATH:
+            case DISCONNECT:
+                state.sendColorCallback(null);
+                return;
+        }
         Scheduler scheduler = Scheduler.get();
         scheduler.runTaskLater(MinecraftUnoRebuilt.INSTANCE, event.getPlayer(),
                 () -> MinecraftUnoRebuilt.GUI_HANDLER.openGui(player, MinecraftUnoRebuilt.GuiIds.UNO_CHOOSE_COLOR, state));
