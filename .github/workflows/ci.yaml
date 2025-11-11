@@ -43,5 +43,6 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
         echo $SSH_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts
+        ssh-keygen -Hf ~/.ssh/known_hosts
     - name: Run test command
       run: ssh mctest@flommc echo 'Hello!' > message.txt
