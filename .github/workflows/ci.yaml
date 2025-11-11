@@ -67,6 +67,6 @@ jobs:
             HashKnownHosts no
           EOF
       - name: Upload plugin to server
-        run: scp artifact/*.jar mctest@flommc:~/paper-1.21.10/plugins/update/
+        run: scp artifact/*.jar mctest@flommc:~/paper-1.21.10/plugins/
       - name: Restart server
         run: ssh mctest@flommc 'screen -dmS "STOP" ~/paper-1.21.10/stop.sh'

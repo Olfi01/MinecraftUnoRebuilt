@@ -1,0 +1,14 @@
+name: Deploy from PR
+on:
+  issue_comment:
+    types:
+      - edited
+
+jobs:
+  deploy:
+    if: ${{ github.event.issue.pull_request && contains(github.event.changes.body, '[x]') && contains(github.event.changes.body.from, '[ ]') }}
+
+    runs-on: crazypokemondev-runner
+
+    steps:
+      - run: echo ${{ github.event.sender }}
