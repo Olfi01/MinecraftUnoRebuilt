@@ -7,45 +7,66 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # build:
+  build:
 
-  #   runs-on: intranet
-  #   permissions:
-  #     contents: read
+    runs-on: crazypokemondev-runner
+    permissions:
+      contents: read
 
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - name: Set up JDK 21
-  #     uses: actions/setup-java@v4
-  #     with:
-  #       java-version: '21'
-  #       distribution: 'temurin'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-  #   - name: Setup Gradle
-  #     uses: gradle/actions/setup-gradle@v4.0.0
+      - name: Setup Gradle caches
+        uses: gradle/actions/setup-gradle@v4.0.0
 
-  #   - name: Build with Gradle Wrapper
-  #     run: ./gradlew build
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+      - name: Upload Plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: UnoRebuilt.jar
+          path: build/libs/*-all.jar
+          if-no-files-found: error
+      - name: Upload Resource Pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: UnoRebuilt.zip
+          path: resource_pack/**
 
   deploy:
-  
+    needs:
+      - build
+
     runs-on: crazypokemondev-runner
     environment: mctest
 
     steps:
-    - name: Set up SSH key
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_HOST_PUBLIC_KEY: ${{ vars.SSH_HOST_PUBLIC_KEY }}
-      run: |
-        mkdir -p ~/.ssh
-        touch ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        echo $SSH_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts
-        cat << EOF >> ~/.ssh/config
-        Host flommc
-          HashKnownHosts no
-        EOF
-    - name: Restart server
-      run: ssh mctest@flommc 'screen -dmS "STOP" ~/paper-1.21.10/stop.sh'
+      - name: Download artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: UnoRebuilt.jar
+          path: artifact
+
+      - name: Set up SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST_PUBLIC_KEY: ${{ vars.SSH_HOST_PUBLIC_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo $SSH_HOST_PUBLIC_KEY >> ~/.ssh/known_hosts
+          cat << EOF >> ~/.ssh/config
+          Host flommc
+            HashKnownHosts no
+          EOF
+      - name: Upload plugin to server
+        run: scp artifact/*.jar mctest@flommc:~/paper-1.21.10/plugins/update/
+      - name: Restart server
+        run: ssh mctest@flommc 'screen -dmS "STOP" ~/paper-1.21.10/stop.sh'
