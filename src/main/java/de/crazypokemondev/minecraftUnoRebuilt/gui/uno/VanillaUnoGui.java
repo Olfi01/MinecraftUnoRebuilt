@@ -33,9 +33,9 @@ public class VanillaUnoGui extends VanillaUnoCardsScreen implements Gui {
                 .orElse(null);
         this.state.registerUpdateHandler(this::update);
 
-        WaitingIndicatorButton waitingButton = new WaitingIndicatorButton();
+        TurnIndicatorButton turnIndicatorButton = new TurnIndicatorButton();
         for (int i = 0; i < 9; i++) {
-            setButton(i, waitingButton);
+            setButton(i, turnIndicatorButton);
         }
         setButton(12, new DrawPileButton());
         setButton(14, new DiscardPileButton());
@@ -151,20 +151,20 @@ public class VanillaUnoGui extends VanillaUnoCardsScreen implements Gui {
         }
     }
 
-    private class WaitingIndicatorButton extends ItemButton<VanillaUnoGui> implements Updatable {
-        ItemStack notWaitingIcon = new ItemBuilder(Material.RED_CONCRETE).name("Not your turn").build();
-        ItemStack waitingIcon = new ItemBuilder(Material.LIME_CONCRETE).name("Your turn").build();
+    private class TurnIndicatorButton extends ItemButton<VanillaUnoGui> implements Updatable {
+        ItemStack notYourTurnIcon = new ItemBuilder(Material.RED_CONCRETE).name("Not your turn").build();
+        ItemStack yourTurnIcon = new ItemBuilder(Material.LIME_CONCRETE).name("Your turn").build();
         ItemStack finishedIcon = new ItemBuilder(Material.GOLD_BLOCK).name("The game is finished!").build();
 
-        public WaitingIndicatorButton() {
+        public TurnIndicatorButton() {
             update();
         }
 
         @Override
         public void update() {
             UnoPlayer nextPlayer = state.getNextPlayer();
-            ItemStack icon = state.isFinished() ? finishedIcon : (player != null && player == nextPlayer ? waitingIcon : notWaitingIcon);
-            if (icon == waitingIcon && nextPlayer != null) {
+            ItemStack icon = state.isFinished() ? finishedIcon : (player != null && player == nextPlayer ? yourTurnIcon : notYourTurnIcon);
+            if (icon == notYourTurnIcon && nextPlayer != null) {
                 icon.editMeta(meta -> meta.displayName(Component.text(nextPlayer.getName() + "'s turn")));
             }
             setIcon(icon);
