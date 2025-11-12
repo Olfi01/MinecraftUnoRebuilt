@@ -19,15 +19,20 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+
     compileOnly("com.github.Jannyboy11.GuiLib:GuiLib-Plugin:1.12.4")
     compileOnly("com.github.Olfi01:UniGUI:v0.1")
+
     implementation("org.eu.zajc:juno:2.3.3")
+
     implementation("com.jeff-media:custom-block-data:2.2.4")
+    implementation("org.spongepowered:configurate-hocon:4.2.0")
+
     compileOnly("com.github.Gecolay.GSit:core:2.4.4")
 }
 
 shadowJar {
-    relocate 'com.jeff_media.customblockdata', 'de.crazypokemondev.minecraftUnoRebuilt.customblockdata'
+    relocate 'com.jeff_media.customblockdata', 'de.crazypokemondev.minecraft.paper.unoRebuilt.customblockdata'
 }
 
 tasks.register("zipResourcePack", Zip) {
