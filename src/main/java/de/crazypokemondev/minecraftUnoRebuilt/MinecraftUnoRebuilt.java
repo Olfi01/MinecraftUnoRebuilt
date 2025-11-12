@@ -1,6 +1,8 @@
 package de.crazypokemondev.minecraftUnoRebuilt;
 
 import com.jeff_media.customblockdata.CustomBlockData;
+import de.crazypokemondev.minecraftUnoRebuilt.config.ConfigHelper;
+import de.crazypokemondev.minecraftUnoRebuilt.config.PluginConfig;
 import de.crazypokemondev.minecraftUnoRebuilt.games.lobby.LobbyState;
 import de.crazypokemondev.minecraftUnoRebuilt.gui.lobby.VanillaLobbyGui;
 import de.crazypokemondev.minecraftUnoRebuilt.gui.uno.VanillaChooseColorGui;
@@ -15,25 +17,35 @@ import de.crazypokemondev.uniGUI.api.GuiHandler;
 import de.crazypokemondev.uniGUI.api.GuiRegistry;
 import de.crazypokemondev.uniGUI.guis.vanilla.VanillaGuiFactoryStateful;
 import lombok.extern.slf4j.Slf4j;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Slf4j
 public final class MinecraftUnoRebuilt extends JavaPlugin {
     public static final String PLUGIN_ID = "MinecraftUnoRebuilt";
     public static MinecraftUnoRebuilt INSTANCE;
     public static GuiHandler GUI_HANDLER;
+    /**
+     * This config is currently READ ONLY. Changes made on the object will NOT persist after a server restart.
+     */
+    public static PluginConfig CONFIG;
 
     public final NamespacedKey UNO_DECK_BLOCK_DATA = new NamespacedKey(this, "uno_deck");
     public final Map<UUID, LobbyState<?>> lobbies = new HashMap<>();
+
+    private static final String CONFIG_FILE_NAME = "UnoRebuilt.conf";
 
     public MinecraftUnoRebuilt() {
         INSTANCE = this;
@@ -41,6 +53,8 @@ public final class MinecraftUnoRebuilt extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        loadConfig();
+
         RegisteredServiceProvider<GuiRegistry> guiRegistryProvider = getServer().getServicesManager().getRegistration(GuiRegistry.class);
         if (guiRegistryProvider == null) {
             log.error("No GuiRegistry service found! Please make sure UniGUI plugin is present in the plugins folder!");
@@ -60,6 +74,30 @@ public final class MinecraftUnoRebuilt extends JavaPlugin {
         registerCraftingRecipes();
     }
 
+    private void loadConfig() {
+        final HoconConfigurationLoader loader = ConfigHelper.configureLoader()
+                .path(getDataPath().resolve(CONFIG_FILE_NAME))
+                .build();
+
+        try {
+            CommentedConfigurationNode node = loader.load();
+            if (!node.virtual()) {
+                final ConfigurationTransformation.Versioned transformation = ConfigHelper.getVersionUpdateTransformation();
+                final int startVersion = transformation.version(node);
+                transformation.apply(node);
+                final int endVersion = transformation.version(node);
+                if (startVersion != endVersion) {
+                    log.info("Updated config schema from version {} to {}", startVersion, endVersion);
+                }
+            }
+            CONFIG = node.get(PluginConfig.class, (Supplier<PluginConfig>) PluginConfig::new);
+            // save in case new defaults have been added
+            loader.save(node);
+        } catch (ConfigurateException e) {
+            throw new RuntimeException("An error occurred while trying to load the configuration file!", e);
+        }
+    }
+
     private void registerEventListeners() {
         CustomBlockData.registerListener(this);
         getServer().getPluginManager().registerEvents(new PlaceBlockListener(this), this);
@@ -71,13 +109,15 @@ public final class MinecraftUnoRebuilt extends JavaPlugin {
     }
 
     private void registerCraftingRecipes() {
-        ItemStack unoDeck = ItemHelper.createUnoDeck();
-        ShapedRecipe unoDeckRecipe = new ShapedRecipe(new NamespacedKey(this, "uno_deck"), unoDeck)
-                .shape("DMD", "MHM", "DMD")
-                .setIngredient('D', Material.COBBLED_DEEPSLATE)
-                .setIngredient('M', Material.NETHER_WART_BLOCK)
-                .setIngredient('H', Material.HAY_BLOCK);
-        getServer().addRecipe(unoDeckRecipe);
+        if (CONFIG.uno.deck.disableCrafting) {
+            ItemStack unoDeck = ItemHelper.createUnoDeck();
+            ShapedRecipe unoDeckRecipe = new ShapedRecipe(new NamespacedKey(this, "uno_deck"), unoDeck)
+                    .shape(CONFIG.uno.deck.recipe.shape);
+            for (PluginConfig.Uno.Deck.UnoDeckRecipe.Ingredient ingredient : CONFIG.uno.deck.recipe.ingredients) {
+                unoDeckRecipe.setIngredient(ingredient.key, ingredient.material);
+            }
+            getServer().addRecipe(unoDeckRecipe);
+        }
     }
 
     private void registerGuis(GuiRegistry registry) {
