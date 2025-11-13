@@ -8,3 +8,12 @@ depend:
   - UniGUI
 softdepend:
   - GSit
+
+permissions:
+  uno.deck.give:
+    description: "Allows the player to give a UNO deck to anyone via command."
+    default: op
+    children:
+      uno.deck.give.self:
+        description: "Allows the player to give a UNO deck only to themselves."
+        default: op

@@ -1,6 +1,7 @@
 package de.crazypokemondev.minecraftUnoRebuilt;
 
 import com.jeff_media.customblockdata.CustomBlockData;
+import de.crazypokemondev.minecraftUnoRebuilt.commands.UnoCommand;
 import de.crazypokemondev.minecraftUnoRebuilt.config.ConfigHelper;
 import de.crazypokemondev.minecraftUnoRebuilt.config.PluginConfig;
 import de.crazypokemondev.minecraftUnoRebuilt.games.lobby.LobbyState;
@@ -16,6 +17,7 @@ import de.crazypokemondev.minecraftUnoRebuilt.listeners.PlayerInteractListener;
 import de.crazypokemondev.uniGUI.api.GuiHandler;
 import de.crazypokemondev.uniGUI.api.GuiRegistry;
 import de.crazypokemondev.uniGUI.guis.vanilla.VanillaGuiFactoryStateful;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lombok.extern.slf4j.Slf4j;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -69,6 +71,8 @@ public final class MinecraftUnoRebuilt extends JavaPlugin {
         }
         GUI_HANDLER = guiHandlerProvider.getProvider();
 
+        registerCommands();
+
         registerEventListeners();
 
         registerCraftingRecipes();
@@ -96,6 +100,12 @@ public final class MinecraftUnoRebuilt extends JavaPlugin {
         } catch (ConfigurateException e) {
             throw new RuntimeException("An error occurred while trying to load the configuration file!", e);
         }
+    }
+
+    private void registerCommands() {
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            commands.registrar().register(UnoCommand.createCommand().build());
+        });
     }
 
     private void registerEventListeners() {
